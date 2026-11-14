@@ -6,11 +6,11 @@
 # Writes media/hero.mp4 and media/hero-poster.webp (plus public/og-image.jpg for link
 # previews). Swapping in a new cut is just: run this, rebuild, commit the three files.
 #
-# Video: H.264 High, 1600 px wide, no audio track, CRF 25 with -tune animation (flat colours
-# and text compress well), +faststart so playback starts before the download finishes.
-# A 65 s 1080p cut comes out at about 3.5 MB; raise CRF if a longer cut exceeds ~5 MB.
-# The current cut is silent, so audio is dropped (-an). If a later cut has sound, replace
-# -an with -c:a aac -b:a 96k; the page's "Player controls" button then exposes the volume.
+# Video: H.264 High, 1600 px wide, CRF 25 with -tune animation (flat colours and text compress
+# well), +faststart so playback starts before the download finishes. If the source has a
+# soundtrack (the *_sound.mp4 cut), it is kept as 96 kb/s AAC: the hero still autoplays muted,
+# and the page's "Player controls" button exposes the volume. A silent source gets no audio
+# track. An 88 s cut comes out at about 5 MB; raise CRF if a cut grows much beyond that.
 set -euo pipefail
 
 src_video="${1:?usage: encode-hero.sh <video.mp4> <poster.png>}"
@@ -18,7 +18,13 @@ src_poster="${2:?usage: encode-hero.sh <video.mp4> <poster.png>}"
 root="$(cd "$(dirname "$0")/.." && pwd)"
 mkdir -p "$root/media" "$root/public"
 
-ffmpeg -y -i "$src_video" -an \
+if ffprobe -v error -select_streams a -show_entries stream=index -of csv=p=0 "$src_video" | grep -q .; then
+  audio=(-c:a aac -b:a 96k -ar 48000)
+else
+  audio=(-an)
+fi
+
+ffmpeg -y -i "$src_video" "${audio[@]}" \
   -vf "scale=1600:-2:flags=lanczos" \
   -c:v libx264 -preset veryslow -tune animation -crf 25 \
   -pix_fmt yuv420p -profile:v high -movflags +faststart \
