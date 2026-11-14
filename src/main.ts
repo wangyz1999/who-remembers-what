@@ -63,66 +63,12 @@ document.querySelectorAll<HTMLElement>('[data-tiles]').forEach((el) => {
 /* Hero video --------------------------------------------------------------------------- */
 function setupVideo(): void {
   const video = document.querySelector<HTMLVideoElement>('#hero-video');
-  const toggle = document.querySelector<HTMLButtonElement>('#video-toggle');
-  const controls = document.querySelector<HTMLButtonElement>('#video-controls');
-  if (!video || !toggle || !controls) return;
+  if (!video) return;
 
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  let userPaused = false;
-
-  const render = (): void => {
-    const playing = !video.paused;
-    toggle.querySelector('[data-icon="pause"]')?.classList.toggle('hidden', !playing);
-    toggle.querySelector('[data-icon="play"]')?.classList.toggle('hidden', playing);
-    const label = toggle.querySelector('[data-label]');
-    if (label) label.textContent = playing ? 'Pause' : 'Play';
-  };
-
-  const play = (): void => {
-    video.play().catch(() => render());
-  };
-
-  // Respect a reduced-motion preference: show the poster and let the viewer start it.
-  if (reduceMotion.matches) {
+  // Respect a reduced-motion preference; native controls let the viewer start it.
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     video.removeAttribute('autoplay');
     video.pause();
-    userPaused = true;
-  }
-
-  video.addEventListener('play', render);
-  video.addEventListener('pause', render);
-  render();
-
-  toggle.addEventListener('click', () => {
-    if (video.paused) {
-      userPaused = false;
-      play();
-    } else {
-      userPaused = true;
-      video.pause();
-    }
-  });
-
-  controls.addEventListener('click', () => {
-    video.controls = !video.controls;
-    controls.setAttribute('aria-pressed', String(video.controls));
-    const label = controls.querySelector('[data-label]');
-    if (label) label.textContent = video.controls ? 'Hide controls' : 'Player controls';
-  });
-
-  // Pause while scrolled out of view; resume on return unless the viewer paused it.
-  if ('IntersectionObserver' in window) {
-    new IntersectionObserver(
-      ([entry]) => {
-        if (!entry) return;
-        if (entry.isIntersecting) {
-          if (!userPaused && video.paused) play();
-        } else if (!video.paused) {
-          video.pause();
-        }
-      },
-      { threshold: 0.2 },
-    ).observe(video);
   }
 }
 

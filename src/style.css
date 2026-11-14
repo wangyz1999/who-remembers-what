@@ -288,64 +288,112 @@
     object-fit: cover;
   }
 
-  /* TL;DR box (sky = "our method" in the figures) -------------------------------- */
+  /* TL;DR ---------------------------------------------------------------------- */
   .tldr {
-    background: var(--color-sky);
-    border: 1.5px solid #a9c9f3;
-    border-radius: 1.1rem;
-    padding: 1.4rem 1.25rem;
+    background: #fff;
+    border: 1px solid var(--color-line);
+    border-radius: 1.25rem;
+    padding: 1.4rem;
+    box-shadow: 0 8px 32px #101a3305;
+  }
+  .tldr-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem 1.5rem;
+  }
+  .tldr-kicker {
+    color: var(--color-global);
+    font-size: 0.8rem;
+    font-weight: 750;
+    letter-spacing: 0.1em;
+  }
+  .tldr-study {
+    color: var(--color-ink-3);
+    font-size: 0.82rem;
+  }
+  .tldr-title {
+    margin-top: 1.15rem;
+    font-size: clamp(1.6rem, 1.15rem + 1.8vw, 2.35rem);
+    line-height: 1.2;
+    font-weight: 750;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+  }
+  .tldr-summary {
+    margin-top: 0.8rem;
+    max-width: 49rem;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--color-ink-2);
+  }
+  .tldr-scopes {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.55rem;
+    margin-top: 1.25rem;
+  }
+  .tldr-scope-label {
+    margin-right: 0.25rem;
+    color: var(--color-ink-3);
+    font-size: 0.82rem;
+    font-weight: 550;
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-top: 1.75rem;
+  }
+  .stats > div {
+    min-width: 0;
+    border: 1px solid #e0e9f6;
+    border-radius: 0.8rem;
+    padding: 1.1rem 0.9rem;
+    background: #f4f8fe;
+  }
+  .stat-q {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--color-ink-3);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+  .stat-n {
+    margin-top: 0.4rem;
+    font-size: clamp(1.8rem, 1.25rem + 2vw, 2.8rem);
+    font-weight: 750;
+    letter-spacing: -0.045em;
+    line-height: 1.15;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-n small {
+    font-size: 0.4em;
+    font-weight: 600;
+    letter-spacing: 0;
+    margin-left: 0.25em;
+    color: var(--color-ink-2);
+  }
+  .stat-l {
+    margin-top: 0.6rem;
+    max-width: 14rem;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--color-ink-2);
+    text-wrap: pretty;
   }
   @media (min-width: 768px) {
     .tldr {
       padding: 2rem 2.25rem;
     }
-  }
-  .stats {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.25rem 1rem;
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid #bcd5f5;
-  }
-  @media (min-width: 900px) {
     .stats {
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 0;
-    }
-    .stats > div + div {
-      border-left: 1px solid #bcd5f5;
-      padding-left: 1.5rem;
     }
     .stats > div {
-      padding-right: 1rem;
+      padding: 1.25rem;
     }
-  }
-  .stat-q {
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--color-ink-3);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-  }
-  .stat-n {
-    font-size: clamp(2rem, 1.5rem + 1.6vw, 2.6rem);
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    line-height: 1.1;
-    font-variant-numeric: tabular-nums;
-  }
-  .stat-n small {
-    font-size: 0.5em;
-    font-weight: 700;
-    letter-spacing: 0;
-    margin-left: 0.22em;
-  }
-  .stat-l {
-    margin-top: 0.3rem;
-    font-size: 0.9rem;
-    line-height: 1.45;
-    color: var(--color-ink-2);
   }
 
   /* Scope matrix ------------------------------------------------------------------- */
@@ -651,6 +699,12 @@
     font-weight: 600;
     background: #fff;
     white-space: nowrap;
+  }
+  .chips a {
+    text-decoration: none;
+  }
+  .chips a:hover {
+    color: var(--color-global);
   }
 
   /* Abstract, collapsed by default. */
