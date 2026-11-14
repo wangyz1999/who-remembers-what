@@ -179,5 +179,15 @@ function setupCopy(): void {
   });
 }
 
+// "Open figure full size" links: Vite fingerprints the <img> sources into assets/ but leaves
+// <a href> alone, so point each link at its image's built URL.
+function setupFigureLinks(): void {
+  document.querySelectorAll<HTMLAnchorElement>('a[href^="./media/"]').forEach((a) => {
+    const img = a.querySelector('img');
+    if (img) a.href = img.src;
+  });
+}
+
 setupVideo();
 setupCopy();
+setupFigureLinks();
