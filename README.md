@@ -28,9 +28,12 @@ in the workflow. `SITE_URL` (also set by the workflow) only fills the social-car
 
 ## Content
 
-Every sentence and number on the page is taken from the paper. Edit `index.html` directly;
-`src/main.ts` only draws the scope-matrix tiles, drives the hero video buttons and the BibTeX
-copy button, and `src/style.css` holds the palette (taken from the paper's figures).
+The page is meant to be skimmed in a few minutes: after the hero, a TL;DR with the headline
+numbers, the four scopes, how it works, three results, the benchmark in one line, and BibTeX.
+Every sentence and number is taken from the paper. Edit `index.html` directly; `src/main.ts`
+draws the scope-matrix tiles, drives the hero video and BibTeX copy buttons, and points the
+"open full size" figure links at the built image URLs. `src/style.css` holds the palette
+(taken from the paper's figures).
 
 Placeholders to fill in are marked `TODO(author)` in `index.html`:
 
@@ -51,28 +54,26 @@ bash scripts/encode-hero.sh path/to/mixua_16x9.mp4 path/to/mixua_16x9_poster.png
 npm run build
 ```
 
-This writes `media/hero.mp4` (H.264, 1600 px wide, CRF 25, `-tune animation`, `+faststart`,
-no audio), `media/hero-poster.webp`, and `public/og-image.jpg`. The page references these
-fixed names, so a new cut is a drop-in replacement. The exact ffmpeg command is in the script.
+This writes `media/hero.mp4` (H.264, 1600 px wide, CRF 25, `-tune animation`, `+faststart`;
+a soundtrack, if the source has one, is kept as 96 kb/s AAC), `media/hero-poster.webp`, and
+`public/og-image.jpg`. The page references these fixed names, so a new cut is a drop-in
+replacement. The exact ffmpeg command is in the script.
 
 ### Figures
 
-Figures are rasterised from the paper's PDF figures to WebP at about twice their display width:
+Figures are rasterised from the paper's PDF figures to WebP at about twice their display width;
+the three result images are single panels cut out with `--clip` (in PDF points):
 
 ```bash
-uv run --with pymupdf --with pillow python scripts/make-image.py <figure.pdf> media/figures/<name>.webp --width 2000
+uv run --with pymupdf --with pillow python scripts/make-image.py <figure.pdf> media/figures/<name>.webp --width 2200
 ```
 
-| File | Paper figure | Width |
-|---|---|---|
-| `overview.webp` | Fig. 1, what MixUA adds to single user-agent memory | 1200 |
-| `settings-1..4.webp` | Fig. 2, the four settings, one panel each (`--clip ... --pad 4 --alpha`) | 640 / 680 / 640 / 760 |
-| `framework.webp` | Fig. 3, the cross-learning loop | 2200 |
-| `results-scheduled.webp` | Fig. 4, scheduled task assignment | 2000 |
-| `results-scaling.webp` | Fig. 5, number of users | 2000 |
-| `results-random.webp` | Fig. 6, random task assignment | 2000 |
-| `task-suites.webp` | Fig. 14, task suites by topic | 2000 |
+| File | Paper figure | Width | Clip |
+|---|---|---|---|
+| `framework.webp` | Fig. 3, the cross-learning loop | 2200 | |
+| `finding-tradeoff.webp` | Fig. 4b, utility gain against preference retention | 1000 | `280,0,494,128.17` |
+| `finding-random.webp` | Fig. 6a, cumulative pass rate over 8 rounds | 800 | `0,0,142,131.2` |
+| `finding-scale.webp` | Fig. 5c, preference retention at 5, 20, 100 users | 900 | `327,24,495.6,136.3` |
 
-The four panel crops of Fig. 2 use, in PDF points: `-3,-3,494,538`, `506,-3,1035,538`,
-`1047,-3,1534,538`, `1545,-3,2134,538`. The four-scope matrix on the page is drawn in HTML/SVG
-(after the paper's Fig. 16), not an image.
+The Fig. 5c crop drops the figure's shared legend, so the page draws that legend in HTML.
+The four-scope matrix is drawn in HTML/SVG (after the paper's Fig. 16), not an image.

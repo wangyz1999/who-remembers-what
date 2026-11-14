@@ -37,10 +37,10 @@
           <span>MixUA</span>
         </a>
         <nav aria-label="Sections" class="hidden items-center gap-7 text-[0.9rem] font-medium text-ink-2 md:flex">
-          <a class="no-underline hover:text-ink" href="#overview">Overview</a>
-          <a class="no-underline hover:text-ink" href="#method">Method</a>
-          <a class="no-underline hover:text-ink" href="#benchmark">Benchmark</a>
+          <a class="no-underline hover:text-ink" href="#idea">Idea</a>
+          <a class="no-underline hover:text-ink" href="#how">How it works</a>
           <a class="no-underline hover:text-ink" href="#results">Results</a>
+          <a class="no-underline hover:text-ink" href="#benchmark">Benchmark</a>
           <a class="no-underline hover:text-ink" href="#citation">Citation</a>
         </nav>
         <a class="btn btn-sm" href="https://arxiv.org/abs/2611.10439" target="_blank" rel="noopener">
@@ -120,641 +120,246 @@
         </figure>
       </section>
 
-      <!-- TL;DR + abstract --------------------------------------------------------------- -->
-      <section id="tldr" class="pb-6 md:pb-10">
+      <!-- TL;DR -------------------------------------------------------------------------- -->
+      <section id="tldr" class="pb-4">
         <div class="wrap">
           <div class="tldr">
             <span class="pill pill-ink"><span>TL;DR</span></span>
-            <p class="mt-4 max-w-[60rem] text-[1.15rem] leading-[1.65] text-ink sm:text-[1.3rem]">
-              <strong class="font-bold">MixUA</strong> distills independent user-agent trajectories into lessons and assigns each lesson to a
+            <p class="mt-4 max-w-[62rem] text-[1.15rem] leading-[1.65] text-ink sm:text-[1.3rem]">
+              <strong class="font-bold">MixUA</strong> lets users and AI agents learn from one another,
+              filing each lesson under a
               <span class="pill pill-pair align-[0.12em]"><span>PAIR</span></span>,
               <span class="pill pill-user align-[0.12em]"><span>USER</span></span>,
               <span class="pill pill-agent align-[0.12em]"><span>AGENT</span></span>, or
               <span class="pill pill-global align-[0.12em]"><span>GLOBAL</span></span>
-              scope, according to whom it benefits and what it may disclose.
-              <strong class="font-bold">CrossLearnBench</strong> tests this on established agent tasks with planted user preferences and private facts.
+              scope, by whom it helps and what it may reveal.
             </p>
             <dl class="stats">
               <div>
                 <dt class="stat-q">up to</dt>
                 <dd class="stat-n">16<small>pts</small></dd>
-                <dd class="stat-l">higher pass rate than no memory</dd>
+                <dd class="stat-l">pass-rate gain over no memory</dd>
               </div>
               <div>
                 <dt class="stat-q">up to</dt>
                 <dd class="stat-n">5<small>pts</small></dd>
-                <dd class="stat-l">higher pass rate than a single global memory</dd>
+                <dd class="stat-l">over a single global memory</dd>
               </div>
               <div>
                 <dt class="stat-q">up to</dt>
                 <dd class="stat-n">90%</dd>
-                <dd class="stat-l">of previously stated preferences retained</dd>
+                <dd class="stat-l">of stated preferences retained</dd>
               </div>
               <div>
                 <dt class="stat-q">at most</dt>
                 <dd class="stat-n">0.02%</dd>
-                <dd class="stat-l">of privacy probes find a planted private fact in a forbidden scope</dd>
+                <dd class="stat-l">of privacy probes find a leaked private fact</dd>
               </div>
             </dl>
-            <p class="mt-5 text-[0.88rem] text-ink-2">With five users and seven agents. The gain holds even on tasks previously tried only by other users on other agents.</p>
+            <p class="mt-5 text-[0.88rem] text-ink-2">Five users, seven agents.</p>
           </div>
 
-          <div class="mt-14 grid grid-cols-1 gap-6 md:grid-cols-[12rem_minmax(0,1fr)]">
-            <h2 class="section-title">Abstract</h2>
-            <p class="body measure">
+          <details class="abstract mt-4">
+            <summary>Abstract</summary>
+            <p>
               Self-evolving agents improve their own skills, memory, and harness code from experience without retraining the base LLM, and group-evolving agents go further by sharing these lessons across agents.
               Yet most such systems overlook that sharing across users and heterogeneous agents requires deciding who can benefit from each lesson and what information must remain private.
-              We present <strong>MixUA</strong>, a memory system that distills independent user-agent trajectories into lessons and assigns each lesson to a user-agent pair, user, agent, or global scope according to whom it benefits and what it may disclose.
-              For evaluation, we introduce <strong>CrossLearnBench</strong>, a mixed-user-agent benchmark that pairs established agent tasks with user preferences and privacy probes that test whether private facts leak into memory other users can read.
+              We present MixUA, a memory system that distills independent user-agent trajectories into lessons and assigns each lesson to a user-agent pair, user, agent, or global scope according to whom it benefits and what it may disclose.
+              For evaluation, we introduce CrossLearnBench, a mixed-user-agent benchmark that pairs established agent tasks with user preferences and privacy probes that test whether private facts leak into memory other users can read.
               With five users and seven agents, MixUA raises pass rates by up to 16 points over no memory and 5 over a single global memory, even on tasks previously tried only by other users on other agents.
               It retains up to 90% of previously stated preferences, and at most 0.02% of privacy probes find a planted private fact in a forbidden scope.
               We hope MixUA offers a scalable path toward a global system where users and agents co-evolve.
             </p>
-          </div>
+          </details>
         </div>
       </section>
 
-      <!-- The problem ---------------------------------------------------------------------- -->
-      <section id="overview" class="section">
-        <div class="wrap">
-          <p class="kicker">The problem</p>
-          <h2 class="section-title mt-2 measure">A lesson learned once should reach everyone it helps, and no one it exposes</h2>
-          <p class="lead mt-5 measure">
-            Self-evolving agents improve their own skills, memory, and harness code from experience, but in single user-agent memory, what one pair discovers cannot transfer to other users or agents.
-            Sharing across a large population of heterogeneous users and agents is harder than pooling every lesson into one shared store: a lesson that helps one user or agent may not help another, and some of what an agent learns about a user should never reach others.
-            Sharing well requires deciding <strong>who can benefit</strong> from each lesson and <strong>what information must remain private</strong>.
-          </p>
+      <!-- The idea: four scopes ----------------------------------------------------------- -->
+      <section id="idea" class="section">
+        <div class="wrap grid grid-cols-1 items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,27rem)] lg:gap-16">
+          <div>
+            <h2 class="section-title">Who should remember each lesson?</h2>
+            <dl class="mt-7">
+              <div class="scope-def">
+                <dt><span class="pill pill-pair"><span>PAIR</span></span></dt>
+                <dd><strong>This user with this agent.</strong> Preferences that differ by agent.</dd>
+              </div>
+              <div class="scope-def">
+                <dt><span class="pill pill-user"><span>USER</span></span></dt>
+                <dd><strong>This user, on any agent.</strong> A preferred document format.</dd>
+              </div>
+              <div class="scope-def">
+                <dt><span class="pill pill-agent"><span>AGENT</span></span></dt>
+                <dd><strong>This agent, for any user.</strong> A tool-calling quirk.</dd>
+              </div>
+              <div class="scope-def">
+                <dt><span class="pill pill-global"><span>GLOBAL</span></span></dt>
+                <dd><strong>Everyone.</strong> A library defect, or the fix for a task.</dd>
+              </div>
+            </dl>
+            <p class="note mt-6">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg>
+              <span>Lessons from private details land only in the user's own <span class="scope">USER</span> or <span class="scope">PAIR</span> memory.</span>
+            </p>
+          </div>
 
-          <div class="mt-12 grid grid-cols-1 items-start gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,32rem)]">
-            <div>
-              <h3 class="sub-title">Three properties of learned knowledge</h3>
-              <p class="body mt-2">We call this setting <em>cross-learning</em>, where independent users and agents learn from one another's experience.</p>
-              <div class="mt-6 grid gap-6">
-                <div class="prop">
-                  <h3><span class="text-ink-3">(i)</span> Transferability</h3>
-                  <p>A new insight, once discovered by any user or agent, should have the opportunity to benefit the whole population.</p>
-                </div>
-                <div class="prop">
-                  <h3><span class="text-ink-3">(ii)</span> Audience selectivity</h3>
-                  <p>Each learned item has an intrinsic <em>generalization scope</em>, the maximal set of user-agent pairs for which it is valid: one user (a personal preference), one agent family (a tool-calling guide), or the whole population (a newly discovered wiki entry).</p>
-                </div>
-                <div class="prop">
-                  <h3><span class="text-ink-3">(iii)</span> Confidentiality</h3>
-                  <p>Each item also carries a <em>disclosure boundary</em>, the widest scope it may occupy before it exposes information private to its origin user. A user's identity stays with that user; a newly discovered bug in an open-source project is safe to share.</p>
-                </div>
+          <figure>
+            <div class="scope-matrix" role="img" aria-label="The four scopes on a users-by-agents grid. PAIR covers one cell, USER that user's row, AGENT that agent's column, GLOBAL every cell. Widening from one user to all users passes a privacy gate.">
+              <span></span>
+              <span class="axis">one agent</span>
+              <span></span>
+              <span class="axis">all agents</span>
+
+              <span class="axis axis-v">one user</span>
+              <div class="scope-cell">
+                <span data-tiles="pair"></span>
+                <span class="pill pill-pair"><span>PAIR</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg></span>
+              </div>
+              <span class="widen" aria-hidden="true"><svg viewBox="0 0 40 10" preserveAspectRatio="none"><path d="M2 5h33" stroke="#5D6984" stroke-width="1.4" /><path d="M33 1.5 38 5l-5 3.5z" fill="#5D6984" /></svg></span>
+              <div class="scope-cell">
+                <span data-tiles="user"></span>
+                <span class="pill pill-user"><span>USER</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg></span>
+              </div>
+
+              <span></span>
+              <p class="gate" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg>
+                privacy gate ↓
+              </p>
+
+              <span class="axis axis-v">all users</span>
+              <div class="scope-cell">
+                <span data-tiles="agent"></span>
+                <span class="pill pill-agent"><span>AGENT</span></span>
+              </div>
+              <span class="widen" aria-hidden="true"><svg viewBox="0 0 40 10" preserveAspectRatio="none"><path d="M2 5h33" stroke="#5D6984" stroke-width="1.4" /><path d="M33 1.5 38 5l-5 3.5z" fill="#5D6984" /></svg></span>
+              <div class="scope-cell">
+                <span data-tiles="global"></span>
+                <span class="pill pill-global"><span>GLOBAL</span></span>
               </div>
             </div>
-            <figure>
-              <div class="plate">
-                <a href="./media/figures/overview.webp" target="_blank" rel="noopener" aria-label="Open figure full size">
-                  <img src="./media/figures/overview.webp" width="1200" height="1018" loading="lazy" decoding="async"
-                    alt="Three rows contrast single user-agent memory (left, pink) with MixUA (right, blue). A reusable fix, such as a package needing a hidden dependency, cannot transfer on the left but goes to GLOBAL memory and reaches all users and agents on the right. A personal preference, such as no em-dashes, cannot transfer to the user's other agents on the left but goes to USER memory and follows its user across agents. Agent-specific advice cannot transfer to other users of the same agent on the left but goes to AGENT memory and follows its agent across users." />
-                </a>
-              </div>
-              <figcaption class="figcap"><b>Figure 1.</b> What MixUA (right) adds to single user-agent memory (left).</figcaption>
-            </figure>
-          </div>
-
-          <div class="mt-16">
-            <h3 class="sub-title">Four settings of agent evolution</h3>
-            <p class="body mt-2 measure">The step from self-evolving agents to self-evolving populations remains open. MixUA targets the fourth setting.</p>
-            <figure class="mt-6">
-              <div class="panels">
-                <div class="panel-row" style="flex: 1026 1 0%">
-                  <div class="panel" style="flex-grow: 497">
-                    <img src="./media/figures/settings-1.webp" width="641" height="697" loading="lazy" decoding="async" alt="Setting 1, single agent learning: one user and one agent with its own memory." />
-                    <p><b class="text-ink">(1)</b> One agent serving a single user improves from its own trajectories.</p>
-                  </div>
-                  <div class="panel" style="flex-grow: 529">
-                    <img src="./media/figures/settings-2.webp" width="681" height="696" loading="lazy" decoding="async" alt="Setting 2, multi-agent team learning: one user and several agents around a shared memory." />
-                    <p><b class="text-ink">(2)</b> A fixed agent team under a single user co-evolves.</p>
-                  </div>
-                </div>
-                <div class="panel-row" style="flex: 1076 1 0%">
-                  <div class="panel" style="flex-grow: 487">
-                    <img src="./media/figures/settings-3.webp" width="641" height="712" loading="lazy" decoding="async" alt="Setting 3, multi-principal agent learning: several users share one agent, with a separate locked memory per user." />
-                    <p><b class="text-ink">(3)</b> One agent serves many users, where inter-user privacy becomes a first-order concern.</p>
-                  </div>
-                  <div class="panel" style="flex-grow: 589">
-                    <img src="./media/figures/settings-4.webp" width="761" height="699" loading="lazy" decoding="async" alt="Setting 4, ours, mixed user agent learning: many users and heterogeneous agents share multi-granularity memories with GLOBAL, USER, AGENT and PAIR levels." />
-                    <p><b class="text-ink">(4)</b> A mixed population of independent users and heterogeneous agents co-evolves.</p>
-                  </div>
-                </div>
-              </div>
-              <figcaption class="figcap"><b>Figure 2.</b> Four settings of agent evolution.</figcaption>
-            </figure>
-          </div>
+            <figcaption class="figcap">Rows are users, columns are agents. The outlined tile is the pair that learned the lesson.</figcaption>
+          </figure>
         </div>
       </section>
 
-      <!-- Method ------------------------------------------------------------------------------ -->
-      <section id="method" class="section">
+      <!-- How it works ---------------------------------------------------------------------- -->
+      <section id="how" class="section">
         <div class="wrap">
-          <p class="kicker">Method</p>
-          <h2 class="section-title mt-2">MixUA: four memory scopes</h2>
-          <p class="lead mt-5 measure">
-            MixUA turns independent trajectories into one shared memory. It casts cross-learning as deciding who reads each lesson,
-            writes and reviews scoped entries while keeping private evidence with its owner, and retrieves the most relevant entries each pair may read.
-          </p>
-
-          <div class="mt-12 grid grid-cols-1 items-start gap-10 lg:grid-cols-[minmax(0,27rem)_minmax(0,1fr)] lg:gap-14">
-            <figure>
-              <div class="scope-matrix" role="img" aria-label="The four scopes as regions of a users-by-agents matrix. Top row, one user: PAIR covers one cell, USER covers that user's whole row. Bottom row, all users: AGENT covers one agent's whole column, GLOBAL covers every cell. Widening from one agent to all agents stays within one user; widening from one user to all users passes a privacy gate.">
-                <span></span>
-                <span class="axis">one agent</span>
-                <span></span>
-                <span class="axis">all agents</span>
-
-                <span class="axis axis-v">one user</span>
-                <div class="scope-cell">
-                  <span data-tiles="pair"></span>
-                  <span class="pill pill-pair"><span>PAIR</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg></span>
-                  <span class="set">{<i>u</i>} × {<i>a</i>}</span>
-                </div>
-                <span class="widen" aria-hidden="true"><span>widen</span><svg viewBox="0 0 40 10" preserveAspectRatio="none"><path d="M2 5h33" stroke="#5D6984" stroke-width="1.4" /><path d="M33 1.5 38 5l-5 3.5z" fill="#5D6984" /></svg></span>
-                <div class="scope-cell">
-                  <span data-tiles="user"></span>
-                  <span class="pill pill-user"><span>USER</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg></span>
-                  <span class="set">{<i>u</i>} × 𝒜</span>
-                </div>
-
-                <span></span>
-                <p class="gate" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg>
-                  widen + privacy gate ↓
-                </p>
-
-                <span class="axis axis-v">all users</span>
-                <div class="scope-cell">
-                  <span data-tiles="agent"></span>
-                  <span class="pill pill-agent"><span>AGENT</span></span>
-                  <span class="set">𝒰 × {<i>a</i>}</span>
-                </div>
-                <span class="widen" aria-hidden="true"><span>widen</span><svg viewBox="0 0 40 10" preserveAspectRatio="none"><path d="M2 5h33" stroke="#5D6984" stroke-width="1.4" /><path d="M33 1.5 38 5l-5 3.5z" fill="#5D6984" /></svg></span>
-                <div class="scope-cell">
-                  <span data-tiles="global"></span>
-                  <span class="pill pill-global"><span>GLOBAL</span></span>
-                  <span class="set">𝒰 × 𝒜</span>
-                </div>
-              </div>
-              <figcaption class="figcap"><b>Figure 3.</b> The four scopes in matrix view, with users as rows and agents as columns; the outlined tile is the pair (<i>u</i>, <i>a</i>) that wrote the entry. Promoting a scope extends it along a row or a column, and only opening the user axis is gated on privacy.</figcaption>
-            </figure>
-
-            <div>
-              <p class="body">An entry written by pair (<i>u</i>, <i>a</i>) can be kept to its user or opened to all users, and kept to its agent or opened to all agents. The four combinations give four scopes:</p>
-              <dl class="mt-6">
-                <div class="scope-def">
-                  <dt><span class="pill pill-pair"><span>PAIR</span></span></dt>
-                  <dd><strong>Read only by the user-agent pair itself.</strong> Holds a user's preferences that conflict across agents, such as asking a verbose agent for terse replies but a terse one for detail.</dd>
-                </div>
-                <div class="scope-def">
-                  <dt><span class="pill pill-user"><span>USER</span></span></dt>
-                  <dd><strong>Read by the user with any agent.</strong> Holds a user's preferences, such as a document format.</dd>
-                </div>
-                <div class="scope-def">
-                  <dt><span class="pill pill-agent"><span>AGENT</span></span></dt>
-                  <dd><strong>Read by the agent with any user.</strong> Holds advice for one agent, such as a tool-calling quirk or a mistake it tends to make.</dd>
-                </div>
-                <div class="scope-def">
-                  <dt><span class="pill pill-global"><span>GLOBAL</span></span></dt>
-                  <dd><strong>Read by everyone.</strong> Holds what helps everyone, such as a library defect or even the fix for one task.</dd>
-                </div>
-              </dl>
-              <p class="body mt-5">A pair's view is its own <span class="scope">PAIR</span> memory, its user's <span class="scope">USER</span> memory, its agent's <span class="scope">AGENT</span> memory, and <span class="scope">GLOBAL</span>; never another user's <span class="scope">USER</span> memory or another pair's <span class="scope">PAIR</span> memory.</p>
-
-              <div class="rule mt-8">
-                <p class="kicker">Placement rule</p>
-                <p class="math mt-2" aria-label="Aud of e is a subset of G of e intersected with D of e">Aud(<i>e</i>) ⊆ 𝒢(<i>e</i>) ∩ 𝒟(<i>e</i>)</p>
-                <p class="mt-2 text-[0.95rem] leading-relaxed text-ink-2">
-                  Each entry's audience must lie within both its <em>generalization scope</em> 𝒢, the pairs for which it is valid, and its <em>disclosure boundary</em> 𝒟, the pairs it may reach without exposing its origin user. Useful knowledge reaches every pair it can, while private knowledge stays with its owner.
-                </p>
-              </div>
+          <h2 class="section-title">How it works</h2>
+          <figure class="mt-7">
+            <div class="plate scroll-x">
+              <a class="wide block" href="./media/figures/framework.webp" target="_blank" rel="noopener" aria-label="Open figure full size">
+                <img src="./media/figures/framework.webp" width="2200" height="824" loading="lazy" decoding="async"
+                  alt="Independent user-agent pairs produce trajectories that are verified, filtered into a reusable and a protected stream, and written into a shared memory store with GLOBAL, USER, AGENT and PAIR sections. A periodic store review re-scopes and merges entries, and relevant memory is retrieved for each authorized audience." />
+              </a>
             </div>
-          </div>
+            <p class="swipe-hint">Swipe to see the whole figure.</p>
+          </figure>
+          <ol class="steps mt-8">
+            <li><span class="step-n" aria-hidden="true">1</span><p>An LLM splits each run into a <strong>shareable</strong> part and a <strong>private</strong> part.</p></li>
+            <li><span class="step-n" aria-hidden="true">2</span><p>Each lesson is written to the scope it fits; private ones stay with their user.</p></li>
+            <li><span class="step-n" aria-hidden="true">3</span><p>Before each task, a pair reads only what it is allowed to see, most relevant first.</p></li>
+          </ol>
+        </div>
+      </section>
 
-          <!-- Loop -->
-          <div class="mt-20">
-            <h3 class="sub-title">The cross-learning loop</h3>
-            <p class="body mt-2 measure">In each round, every pair attempts its tasks with the memory it may read; the round's trajectories are then written into the store one at a time before the next round begins.</p>
-            <figure class="mt-6">
-              <div class="plate scroll-x">
-                <a class="wide block" href="./media/figures/framework.webp" target="_blank" rel="noopener" aria-label="Open figure full size">
-                  <img src="./media/figures/framework.webp" width="2200" height="824" loading="lazy" decoding="async"
-                    alt="Independent user-agent pairs produce trajectories that are verified, filtered into a reusable and a protected stream, and written into a shared memory store with GLOBAL, USER, AGENT and PAIR sections. The reusable stream may go to any valid scope; the protected stream to USER or PAIR only. A periodic store review re-scopes entries (promote on independent origins, demote on failures or contradictions) and merges entries within the same scope and owner, preserving provenance. Relevant memory is retrieved for each authorized audience." />
+      <!-- Results ------------------------------------------------------------------------------- -->
+      <section id="results" class="section">
+        <div class="wrap">
+          <h2 class="section-title">Results</h2>
+          <div class="results mt-8">
+            <figure class="result">
+              <div class="result-img">
+                <a href="./media/figures/finding-tradeoff.webp" target="_blank" rel="noopener" aria-label="Open figure full size">
+                  <img src="./media/figures/finding-tradeoff.webp" width="1001" height="599" loading="lazy" decoding="async"
+                    alt="Scatter of utility gain over no memory against preference retention. PAIR-only retains preferences but gains little; GLOBAL-only gains but retains few; the four MixUA variants sit together in the top-right corner." />
                 </a>
               </div>
-              <p class="swipe-hint">Swipe sideways to see the whole figure, or tap it to open full size.</p>
-              <figcaption class="figcap"><b>Figure 4.</b> The cross-learning loop. Independent user-agent pairs produce trajectories, each split into a reusable and a protected stream. The memory writer places knowledge into four scopes, confining protected entries to the owner's <span class="scope">USER</span> and <span class="scope">PAIR</span> memory, and a periodic store review promotes, demotes, and merges entries.</figcaption>
+              <figcaption>
+                <p class="result-tag">Scheduled tasks</p>
+                <h3>Only MixUA gets both</h3>
+                <p>Single-scope memories trade task success for preferences; MixUA gains <strong>13-16 points</strong> while retaining <strong>80-90%</strong>.</p>
+              </figcaption>
             </figure>
-
-            <div class="mt-12 grid grid-cols-1 items-start gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] lg:gap-14">
-              <ol class="grid gap-8">
-                <li class="flex gap-4">
-                  <span class="step-n" aria-hidden="true">1</span>
-                  <div>
-                    <h4 class="text-[1.05rem] font-bold">Dual-stream writing</h4>
-                    <p class="body mt-1">After each round, every trajectory is split into a reusable and a protected stream, sent to two isolated writers, so a writer that sees protected content never writes a shared entry. Each entry is labelled by the stream it was written from, not by the writer.</p>
-                    <div class="mt-3 flex flex-wrap gap-2">
-                      <span class="pill pill-global pill-text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M14 3v5h5M9 13h6M9 17h4" /></svg><span><b>Reusable</b> stream → any valid scope</span></span>
-                      <span class="pill pill-user pill-text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg><span><b>Protected</b> stream → <b>USER</b> or <b>PAIR</b> only</span></span>
-                    </div>
-                  </div>
-                </li>
-                <li class="flex gap-4">
-                  <span class="step-n" aria-hidden="true">2</span>
-                  <div>
-                    <h4 class="text-[1.05rem] font-bold">Periodic store review</h4>
-                    <p class="body mt-1">A writer sees one trajectory at a time, so it can scope a lesson too narrowly or too widely, and different trajectories can yield duplicate lessons. After every round, the review re-scopes each entry with the whole store in view, then merges entries within each destination.</p>
-                  </div>
-                </li>
-                <li class="flex gap-4">
-                  <span class="step-n" aria-hidden="true">3</span>
-                  <div>
-                    <h4 class="text-[1.05rem] font-bold">Retrieval within the pair's view</h4>
-                    <p class="body mt-1">Before each attempt, the entries of each scope the pair may read are ranked by the cosine similarity between the embeddings of their situation and the task prompt, and added to the prompt up to a per-scope character budget.</p>
-                  </div>
-                </li>
-              </ol>
-
-              <aside class="entry" aria-label="Anatomy of a memory entry">
-                <p class="kicker">Anatomy of an entry</p>
-                <dl class="mt-3">
-                  <div><dt>Situation</dt><dd>When the lesson applies. Every lesson is conditioned on one, so retrieval can match it to the tasks it applies to.</dd></div>
-                  <div><dt>Lesson</dt><dd>What was learned.</dd></div>
-                  <div><dt>Scope</dt><dd><span class="flex flex-wrap gap-1.5"><span class="pill pill-pair"><span>PAIR</span></span><span class="pill pill-user"><span>USER</span></span><span class="pill pill-agent"><span>AGENT</span></span><span class="pill pill-global"><span>GLOBAL</span></span></span></dd></div>
-                  <div><dt>Provenance</dt><dd>The originating tasks, pairs, rounds, and outcomes.</dd></div>
-                </dl>
-                <p class="mt-3 border-t border-faint pt-3 text-[0.85rem] leading-relaxed text-ink-3">Two writers test whether the design depends on how entries are produced: an LLM writer that returns all operations in one response, and an agentic writer that can inspect the sample and the store and make multi-turn edits.</p>
-              </aside>
-            </div>
+            <figure class="result">
+              <div class="result-img">
+                <a href="./media/figures/finding-random.webp" target="_blank" rel="noopener" aria-label="Open figure full size">
+                  <img src="./media/figures/finding-random.webp" width="800" height="740" loading="lazy" decoding="async"
+                    alt="Cumulative pass rate over eight rounds of random tasks: MixUA rises highest, GLOBAL-only next, with PAIR-only and no memory lower." />
+                </a>
+              </div>
+              <figcaption>
+                <p class="result-tag">Random tasks, 8 rounds</p>
+                <h3>It helps on new tasks</h3>
+                <p>On tasks no pair had tried before, MixUA gains <strong>10.1 points</strong>, nearly twice the 5.5 of a single global memory.</p>
+              </figcaption>
+            </figure>
+            <figure class="result">
+              <div class="result-img">
+                <a href="./media/figures/finding-scale.webp" target="_blank" rel="noopener" aria-label="Open figure full size">
+                  <img src="./media/figures/finding-scale.webp" width="901" height="600" loading="lazy" decoding="async"
+                    alt="Preference retention of users told in round 1, at 5, 20 and 100 users: MixUA stays highest, PAIR-only falls as users are added, and GLOBAL-only and no memory stay low." />
+                </a>
+                <ul class="legend" aria-label="Legend">
+                  <li><i style="--c: #7f7f7f; border-top-style: dashed"></i>No memory</li>
+                  <li><i style="--c: #9ecae1"></i>PAIR only</li>
+                  <li><i style="--c: #08519c"></i>GLOBAL only</li>
+                  <li><i style="--c: #d55e00"></i>MixUA</li>
+                </ul>
+              </div>
+              <figcaption>
+                <p class="result-tag">5 to 100 users</p>
+                <h3>It holds at 100 users</h3>
+                <p>MixUA still retains <strong>78%</strong> of stated preferences; a single global memory retains 11%.</p>
+              </figcaption>
+            </figure>
           </div>
         </div>
       </section>
 
       <!-- Benchmark ------------------------------------------------------------------------- -->
       <section id="benchmark" class="section">
-        <div class="wrap">
-          <p class="kicker">Benchmark</p>
-          <h2 class="section-title mt-2">CrossLearnBench</h2>
-          <p class="lead mt-5 measure">
-            To our knowledge, the first benchmark to measure cross-user and cross-agent learning under privacy and preference constraints. It has two layers:
-            tasks from established benchmarks test task success, and a user layer tests what memory retains and leaks, which the verifiers do not measure.
-          </p>
-
-          <div class="mt-12 grid grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,34rem)] lg:gap-16">
-            <div>
-              <h3 class="sub-title"><span class="text-ink-3">1.</span> Established agent tasks</h3>
-              <p class="body mt-2">Tasks from seven established datasets run in Docker sandboxes, with each environment, instruction, and verifier unchanged. Under scheduled task assignment, 178 tasks drive evolution and 20 are held out.</p>
-            </div>
-            <div>
-              <div class="tbl-wrap">
-                <table class="tbl">
-                  <caption class="sr-only">Tasks per source suite under scheduled task assignment</caption>
-                  <thead>
-                    <tr><th scope="col">Suite</th><th scope="col">Evolution</th><th scope="col">Held-out</th></tr>
-                  </thead>
-                  <tbody>
-                    <tr><td>AutoCodeBench</td><td>21</td><td>4</td></tr>
-                    <tr><td>FeatureBench</td><td>20</td><td>4</td></tr>
-                    <tr><td>SpreadsheetBench (verified)</td><td>23</td><td>4</td></tr>
-                    <tr><td>SWT-Bench (verified)</td><td>22</td><td>4</td></tr>
-                    <tr><td>Terminal-Bench 2.0</td><td>39</td><td>0</td></tr>
-                    <tr><td>USACO</td><td>23</td><td>4</td></tr>
-                    <tr><td>VMax Tasks</td><td>30</td><td>0</td></tr>
-                    <tr class="sep"><td><b>Total</b></td><td><b>178</b></td><td><b>20</b></td></tr>
-                  </tbody>
-                </table>
-              </div>
-              <p class="figcap"><b>Table 1.</b> Tasks by source suite under scheduled task assignment. SpreadsheetBench and SWT-Bench use their verified subsets. Held-out task ids are disjoint from evolution ids.</p>
-            </div>
+        <div class="wrap grid grid-cols-1 items-center gap-8 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:gap-16">
+          <div>
+            <h2 class="section-title">CrossLearnBench</h2>
+            <p class="lead mt-4">Established agent tasks, plus synthetic users with planted preferences and private facts.</p>
           </div>
-          <figure class="mt-10">
-              <div class="plate scroll-x">
-                <a class="wide block" href="./media/figures/task-suites.webp" target="_blank" rel="noopener" aria-label="Open figure full size">
-                  <img src="./media/figures/task-suites.webp" width="2000" height="719" loading="lazy" decoding="async"
-                    alt="Treemap of the task suites by topic: terminal tasks, JS library bug fixes, spreadsheet edits, issue-reproducing tests, library features, Olympiad algorithms and code-to-a-spec tasks, with bars for the deliverable and the language the agent writes." />
-                </a>
-              </div>
-              <p class="swipe-hint">Swipe sideways to see the whole figure.</p>
-              <figcaption class="figcap"><b>Figure 5.</b> The task suites used under scheduled task assignment, by suite (blocks) and topic (tiles); area is task count, hatching marks held-out tasks. Bars give what the agent hands in and the language it writes.</figcaption>
-            </figure>
-
-          <div class="mt-16">
-            <h3 class="sub-title"><span class="text-ink-3">2.</span> A user layer on top of every task</h3>
-            <p class="body mt-2 measure">The source benchmarks contain no private information and do not evaluate privacy, so we plant private facts into each task environment, personalized for each user, and give each user document preferences.</p>
-            <div class="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2">
-              <div class="layer">
-                <div class="flex items-center gap-3">
-                  <img class="avatar" src="./media/characters/user3.webp" width="144" height="139" alt="" loading="lazy" />
-                  <span class="pill pill-ink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg><span>Private facts</span></span>
-                </div>
-                <ul>
-                  <li>Each user has a synthetic persona with <strong>nine always-private items</strong> of personally identifiable information and one fact per category of a privacy survey.</li>
-                  <li>Each fact's privacy label comes from per-user survey responses, so the same category can be private for one user and not for another.</li>
-                  <li>Facts are planted <em>ambiently</em>, in files with neutral names at the project root, to simulate a messy workspace. A half-filled loan application, for example, is planted as <code class="file">form.txt</code>.</li>
-                  <li>We measure <strong>exposure</strong>, how often the agent opens a planted file, and <strong>leakage</strong>, whether a planted fact appears in the trajectory passed to the writer, in the user's own memory, or in another user's memory.</li>
-                </ul>
-              </div>
-              <div class="layer">
-                <div class="flex items-center gap-3">
-                  <img class="avatar" src="./media/characters/user1.webp" width="144" height="146" alt="" loading="lazy" />
-                  <span class="pill pill-ink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M14 3v5h5" /></svg><span>Document preferences</span></span>
-                </div>
-                <ul>
-                  <li>Every task also asks the agent to write a summary document when it finishes.</li>
-                  <li>Each user has <strong>four document preferences</strong>: a filename, a sign-off date format, an ordered set of sections, and one banned markup, such as em dashes.</li>
-                  <li>Preferences are consistent across rounds but can conflict across the agents a user works with.</li>
-                  <li>They are stated <strong>only in round 1</strong>; later rounds rely on memory to carry them, and an automatic parser scores each document.</li>
-                </ul>
+          <div class="bench">
+            <div class="bench-row">
+              <span class="bench-label">Tasks from</span>
+              <ul class="chips">
+                <li>AutoCodeBench</li>
+                <li>FeatureBench</li>
+                <li>SpreadsheetBench (verified)</li>
+                <li>SWT-Bench (verified)</li>
+                <li>USACO</li>
+                <li>Terminal-Bench 2.0</li>
+                <li>VMax Tasks</li>
+              </ul>
+            </div>
+            <div class="bench-row">
+              <span class="bench-label">Run by</span>
+              <div class="flex flex-wrap items-center gap-2.5">
+                <span class="flex gap-1" aria-hidden="true">
+                  <img class="h-7 w-auto" src="./media/characters/agent1.webp" width="144" height="132" alt="" loading="lazy" />
+                  <img class="h-7 w-auto" src="./media/characters/agent2.webp" width="144" height="109" alt="" loading="lazy" />
+                  <img class="h-7 w-auto" src="./media/characters/agent3.webp" width="144" height="128" alt="" loading="lazy" />
+                </span>
+                <span class="text-[0.95rem] text-ink-2">seven LLM-harness combinations</span>
               </div>
             </div>
-
-            <dl class="mt-10 grid grid-cols-1 gap-6 border-t-2 border-ink pt-6 md:grid-cols-3">
-              <div>
-                <dt class="font-bold">Utility</dt>
-                <dd class="mt-1 text-[0.95rem] leading-relaxed text-ink-2">The pass rate under each source benchmark's verifier.</dd>
+            <div class="bench-row">
+              <span class="bench-label">Users bring</span>
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="flex -space-x-2" aria-hidden="true">
+                  <img class="h-8 w-auto" src="./media/characters/user1.webp" width="144" height="146" alt="" loading="lazy" />
+                  <img class="h-8 w-auto" src="./media/characters/user2.webp" width="144" height="178" alt="" loading="lazy" />
+                  <img class="h-8 w-auto" src="./media/characters/user3.webp" width="144" height="139" alt="" loading="lazy" />
+                </span>
+                <span class="pill pill-ink pill-text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M14 3v5h5" /></svg><span>preferences</span></span>
+                <span class="pill pill-ink pill-text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg><span>private facts</span></span>
               </div>
-              <div>
-                <dt class="font-bold">Preference retention</dt>
-                <dd class="mt-1 text-[0.95rem] leading-relaxed text-ink-2">The rate of satisfied document checks after the round-1 statement is withdrawn.</dd>
-              </div>
-              <div>
-                <dt class="font-bold">Privacy</dt>
-                <dd class="mt-1 text-[0.95rem] leading-relaxed text-ink-2">The share of memory probes finding a planted private fact in a forbidden scope, or a user's preference in another user's memory.</dd>
-              </div>
-            </dl>
-          </div>
-        </div>
-      </section>
-
-      <!-- Results ----------------------------------------------------------------------------- -->
-      <section id="results" class="section">
-        <div class="wrap">
-          <p class="kicker">Results</p>
-          <h2 class="section-title mt-2">What sharing buys, and what it keeps private</h2>
-
-          <div class="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3 text-[0.98rem] text-ink-2">
-            <span class="flex items-center gap-2">
-              <span class="flex -space-x-2" aria-hidden="true">
-                <img class="h-8 w-auto" src="./media/characters/user1.webp" width="144" height="146" alt="" loading="lazy" />
-                <img class="h-8 w-auto" src="./media/characters/user2.webp" width="144" height="178" alt="" loading="lazy" />
-                <img class="h-8 w-auto" src="./media/characters/user3.webp" width="144" height="139" alt="" loading="lazy" />
-              </span>
-              <span><strong class="text-ink">5</strong> synthetic users</span>
-            </span>
-            <span class="flex items-center gap-2">
-              <span class="mr-2 text-ink-3" aria-hidden="true">×</span>
-              <span class="flex gap-1" aria-hidden="true">
-                <img class="h-7 w-auto" src="./media/characters/agent1.webp" width="144" height="132" alt="" loading="lazy" />
-                <img class="h-7 w-auto" src="./media/characters/agent2.webp" width="144" height="109" alt="" loading="lazy" />
-                <img class="h-7 w-auto" src="./media/characters/agent3.webp" width="144" height="128" alt="" loading="lazy" />
-              </span>
-              <span><strong class="text-ink">7</strong> LLM-harness combinations</span>
-            </span>
-            <span><span class="mr-3 text-ink-3" aria-hidden="true">=</span><strong class="text-ink">35</strong> user-agent pairs</span>
-          </div>
-          <p class="body mt-5 measure">
-            We compare no memory, four single-scope stores (<span class="scope">GLOBAL</span>-only, <span class="scope">USER</span>-only, <span class="scope">AGENT</span>-only, <span class="scope">PAIR</span>-only), and MixUA with an LLM or an agentic writer, each with and without store review.
-            The single-scope stores also stand in for memory designs in prior work: <span class="scope">PAIR</span>-only for an assistant memory such as MemGPT, <span class="scope">USER</span>-only for a personal memory such as MIRIX, <span class="scope">AGENT</span>-only for a team memory such as G-Memory, and <span class="scope">GLOBAL</span>-only for a broadcast skill library such as SkillClaw.
-          </p>
-
-          <ol class="mt-10 max-w-[56rem]">
-            <li class="finding">
-              <span class="step-n" aria-hidden="true">1</span>
-              <div>
-                <h4>Memory sharing helps beyond private memory</h4>
-                <p>Four-scope memory gains up to 16 points of pass rate against 4 for memory private to each pair, and up to 14 even on tasks previously attempted only by different users with different agents.</p>
-              </div>
-            </li>
-            <li class="finding">
-              <span class="step-n" aria-hidden="true">2</span>
-              <div>
-                <h4>The gain extends to new tasks</h4>
-                <p>On tasks no user-agent pair had attempted before, MixUA gains 10.1 points over no memory, nearly twice the 5.5 of a single global memory.</p>
-              </div>
-            </li>
-            <li class="finding">
-              <span class="step-n" aria-hidden="true">3</span>
-              <div>
-                <h4>Utility gains coexist with personalization and privacy</h4>
-                <p>MixUA retains up to 90% of previously stated preferences, and no more than 0.02% of probes find a planted private fact in a forbidden scope.</p>
-              </div>
-            </li>
-            <li class="finding">
-              <span class="step-n" aria-hidden="true">4</span>
-              <div>
-                <h4>Store review sharpens placement</h4>
-                <p>Store review improves both writers, raising Δ from 15.3 to 16.3 points with the LLM writer and from 12.8 to 14.0 with the agentic writer, and lowering preference leaks from 4.8% to 3.6% and from 1.3% to 0.9%.</p>
-              </div>
-            </li>
-          </ol>
-
-          <!-- Scheduled -->
-          <div class="mt-20">
-            <h3 class="sub-title">Scheduled tasks: three rounds, rotating pairs</h3>
-            <p class="body mt-2 measure">
-              A fixed schedule of 171 attempts per round rotates tasks across pairs, so a task is met again by the same pair, by a pair sharing its user or agent, or by a pair sharing neither, and we can tell whose experience produced each gain.
-              Each single-scope store trades utility for preferences: <span class="scope">GLOBAL</span>-only gains the most (11.5 points) but retains no more preferences than no memory (11%), and <span class="scope">PAIR</span>-only the reverse (4.3 points, 80%).
-              <strong>MixUA attains both, gaining 13-16 points while retaining 80-90%.</strong>
-              On tasks tried before by a different user and agent, where only the <span class="scope">GLOBAL</span> scope can carry the lesson, MixUA gains 11-14 points against 8.9 for <span class="scope">GLOBAL</span>-only and 1.6 for <span class="scope">PAIR</span>-only.
-            </p>
-            <figure class="mt-6">
-              <div class="plate scroll-x">
-                <a class="wide block" href="./media/figures/results-scheduled.webp" target="_blank" rel="noopener" aria-label="Open figure full size">
-                  <img src="./media/figures/results-scheduled.webp" width="2000" height="518" loading="lazy" decoding="async"
-                    alt="(a) Pass rate over three evolution rounds: the MixUA variants rise highest, above GLOBAL-only, with USER-, AGENT- and PAIR-only lower and no memory flat. (b) Utility gain against preference retention: single-scope stores score high on one axis only, and only the four MixUA variants sit in the top-right corner." />
-                </a>
-              </div>
-              <p class="swipe-hint">Swipe sideways to see the whole figure.</p>
-              <figcaption class="figcap"><b>Figure 6.</b> (a) Pass rate by evolution round, mean ± s.d. over runs (+R denotes store review); no memory cannot learn, so it is one band. (b) Utility gain against preference retention; only the four MixUA variants attain both. Hollow markers (+P) are the <em>+ protected stream</em> rows of Table 2, with arrows from the rows they modify.</figcaption>
-            </figure>
-
-            <div class="mt-10">
-              <div class="tbl-wrap">
-                <table class="tbl">
-                  <caption class="sr-only">Main results under scheduled task assignment</caption>
-                  <thead>
-                    <tr class="group">
-                      <th></th>
-                      <th colspan="3"><span>Utility</span></th>
-                      <th colspan="2"><span>Preference</span></th>
-                      <th colspan="2"><span>Privacy</span></th>
-                    </tr>
-                    <tr>
-                      <th scope="col">Condition</th>
-                      <th scope="col">Pass R3 ↑</th>
-                      <th scope="col">Δ ↑</th>
-                      <th scope="col">Δ<sub>cross</sub> ↑</th>
-                      <th scope="col">Evol. ↑</th>
-                      <th scope="col">Held-out ↑</th>
-                      <th scope="col">Pref. leak ↓</th>
-                      <th scope="col">Exposed ↓</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr><td>No memory</td><td>72.0<span class="pm">±1.2</span></td><td>–<span class="sig"></span></td><td>–<span class="sig"></span></td><td>11</td><td>–</td><td><i>n/a</i></td><td>8</td></tr>
-                    <tr><td>PAIR only</td><td>77.6<span class="pm">±1.5</span></td><td>+4.3<span class="pm">±0.8</span><span class="sig">**</span></td><td>+1.6<span class="sig"></span></td><td>80</td><td>79</td><td><i>n/a</i></td><td>20</td></tr>
-                    <tr><td>USER only</td><td>80.4<span class="pm">±1.4</span></td><td>+8.8<span class="pm">±0.8</span><span class="sig">**</span></td><td>+3.3<span class="sig"></span></td><td>37</td><td>20</td><td><i>n/a</i></td><td>12</td></tr>
-                    <tr><td>AGENT only</td><td>78.6<span class="pm">±0.4</span></td><td>+5.1<span class="pm">±1.5</span><span class="sig">**</span></td><td>+3.3<span class="sig"></span></td><td>12</td><td>10</td><td>1.2<sup>‡</sup></td><td>9</td></tr>
-                    <tr class="sub"><td>+ protected stream</td><td>80.7<span class="pm">±0.1</span></td><td>+7.3<span class="pm">±0.3</span><span class="sig">**</span></td><td>+5.4<span class="sig">*</span></td><td>33</td><td>18</td><td>26.3</td><td>10</td></tr>
-                    <tr><td>GLOBAL only</td><td>85.5<span class="pm">±1.6</span></td><td>+11.5<span class="pm">±0.6</span><span class="sig">**</span></td><td>+8.9<span class="sig">**</span></td><td>11</td><td>10</td><td>0.4<sup>‡</sup></td><td>6</td></tr>
-                    <tr class="sub"><td>+ protected stream</td><td>86.9<span class="pm">±0.1</span></td><td>+13.2<span class="pm">±0.9</span><span class="sig">**</span></td><td>+12.6<span class="sig">**</span></td><td>15</td><td>12</td><td>5.5</td><td>8</td></tr>
-                    <tr class="ours sep"><td>MixUA (LLM)</td><td>88.1<span class="pm">±1.7</span></td><td>+15.3<span class="pm">±1.8</span><span class="sig">**</span></td><td>+13.0<span class="sig">**</span></td><td><b>90</b></td><td><b>90</b></td><td>4.8</td><td>26</td></tr>
-                    <tr class="ours"><td>MixUA (LLM) + review</td><td><b>89.8</b><span class="pm">±1.3</span></td><td><b>+16.3</b><span class="pm">±1.1</span><span class="sig">**</span></td><td><b>+13.9</b><span class="sig">**</span></td><td>89</td><td><b>90</b></td><td>3.6</td><td>24</td></tr>
-                    <tr class="ours sub"><td>10k char retrieval limit</td><td>85.3<span class="pm">±1.4</span></td><td>+13.1<span class="pm">±1.0</span><span class="sig">**</span></td><td>+10.9<span class="sig">**</span></td><td>89</td><td>78</td><td>3.0</td><td>17</td></tr>
-                    <tr class="ours sub"><td>file-based memory</td><td>87.2<span class="pm">±2.3</span></td><td>+14.5<span class="pm">±1.8</span><span class="sig">**</span></td><td>+12.9<span class="sig">**</span></td><td>82</td><td>75</td><td>–<sup>†</sup></td><td>18</td></tr>
-                    <tr class="ours"><td>MixUA (agentic)</td><td>86.3<span class="pm">±2.0</span></td><td>+12.8<span class="pm">±2.7</span><span class="sig">**</span></td><td>+12.4<span class="sig">**</span></td><td>80</td><td>78</td><td>1.3</td><td>11</td></tr>
-                    <tr class="ours"><td>MixUA (agentic) + review</td><td>87.1<span class="pm">±0.4</span></td><td>+14.0<span class="pm">±1.3</span><span class="sig">**</span></td><td>+10.7<span class="sig">**</span></td><td>86</td><td>84</td><td><b>0.9</b></td><td>12</td></tr>
-                  </tbody>
-                </table>
-              </div>
-              <p class="swipe-hint">Swipe sideways to see all columns.</p>
-<p class="figcap">
-                <b>Table 2.</b> Main results, mean ± s.d. over three runs. Δ is the gain over no memory in rounds 2-3 (pp), and Δ<sub>cross</sub> the same on tasks tried before only by pairs sharing neither user nor agent. Preference is retention (%). Privacy is the % of probes finding a user's preference in another user's memory and of attempts opening a planted file.
-                <sup>†</sup>Files searched on demand, whose leak rate is not comparable; <sup>‡</sup>no protected stream, so the preference leak is not comparable. Exact McNemar significance: <sup>*</sup><i>p</i> &lt; 0.05, <sup>**</sup><i>p</i> &lt; 0.01. Bold marks the best per column.
-              </p>
-            </div>
-          </div>
-
-          <!-- Random -->
-          <div class="mt-20">
-            <h3 class="sub-title">Random tasks: eight rounds, mostly unseen tasks</h3>
-            <p class="body mt-2 measure">
-              Closer to a real deployment, each round draws 60 tasks from a 546-task pool and gives each to a random pair, so a task returns only by chance. In rounds 2-8, 526 of 821 attempts are on a task that no user-agent pair had attempted before.
-              <strong>On these, MixUA gains 10.1 points (<i>p</i> &lt; 10<sup>−7</sup>), nearly twice the 5.5 of <span class="scope">GLOBAL</span>-only</strong>, with the gap widening over rounds.
-              Preferences stated in round 1 persist: MixUA retains 76% in round 8, whereas <span class="scope">PAIR</span>-only declines from 87% to 44%.
-            </p>
-            <figure class="mt-6">
-              <div class="plate scroll-x">
-                <a class="wide block" href="./media/figures/results-random.webp" target="_blank" rel="noopener" aria-label="Open figure full size">
-                  <img src="./media/figures/results-random.webp" width="2000" height="530" loading="lazy" decoding="async"
-                    alt="(a) Cumulative pass rate over eight rounds: MixUA rises highest, GLOBAL-only next, with PAIR-only and no memory lower. (b) Retention of round-1 preferences: MixUA stays high, PAIR-only declines steadily, and GLOBAL-only and no memory drop sharply after round 1. (c) Gain over no memory, split by who tried the task before." />
-                </a>
-              </div>
-              <p class="swipe-hint">Swipe sideways to see the whole figure.</p>
-              <figcaption class="figcap"><b>Figure 7.</b> Random task assignment, two seeds pooled; shading and whiskers span the two seeds. (a) Cumulative pass rate. (b) Retention of the preferences stated in round 1. (c) Gain over no memory by who tried the task before.</figcaption>
-            </figure>
-          </div>
-
-          <!-- Scaling -->
-          <div class="mt-20">
-            <h3 class="sub-title">Scaling to 20 and 100 users</h3>
-            <p class="body mt-2 measure">
-              The same random task assignment with 5, 20, and 100 users, one seed per size. Among users whose preferences were stated in round 1, MixUA retains 89%, 82%, and 78%, against 11%, 12%, and 11% for <span class="scope">GLOBAL</span>-only.
-              Its gain over no memory is marked n.s. against <span class="scope">GLOBAL</span>-only's at every size.
-            </p>
-            <figure class="mt-6">
-              <div class="plate scroll-x">
-                <a class="wide block" href="./media/figures/results-scaling.webp" target="_blank" rel="noopener" aria-label="Open figure full size">
-                  <img src="./media/figures/results-scaling.webp" width="2000" height="551" loading="lazy" decoding="async"
-                    alt="Bar charts of gain over no memory for 5, 20 and 100 users, for all attempts (a) and first attempts (b), with MixUA versus GLOBAL-only marked n.s. at each size; and (c) a line chart of preference retention among told users, where MixUA stays highest, PAIR-only falls as users are added, and GLOBAL-only stays low." />
-                </a>
-              </div>
-              <p class="swipe-hint">Swipe sideways to see the whole figure.</p>
-              <figcaption class="figcap"><b>Figure 8.</b> Number of users under random task assignment, one seed each. (a, b) Gain over no memory in rounds 2-8, 95% intervals; n.s.: MixUA vs. <span class="scope">GLOBAL</span>-only. (c) Preference retention of users told in round 1.</figcaption>
-            </figure>
-
-            <div class="mt-10 tbl-wrap">
-              <table class="tbl">
-                <caption class="sr-only">Number of users under random task assignment</caption>
-                <thead>
-                  <tr class="group">
-                    <th></th><th></th><th></th>
-                    <th colspan="2"><span>Gain (pp)</span></th>
-                    <th colspan="2"><span>Preference (%)</span></th>
-                    <th><span>Privacy</span></th>
-                  </tr>
-                  <tr>
-                    <th scope="col">Users</th>
-                    <th scope="col" class="!text-left">Condition</th>
-                    <th scope="col">Pass</th>
-                    <th scope="col">All</th>
-                    <th scope="col">First</th>
-                    <th scope="col">Told</th>
-                    <th scope="col">All</th>
-                    <th scope="col">Private facts</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr><td>5</td><td class="!text-left">No memory</td><td>71.3</td><td>–<span class="sig"></span></td><td>–<span class="sig"></span></td><td>10</td><td>10</td><td><i>n/a</i></td></tr>
-                  <tr><td></td><td class="!text-left">PAIR only</td><td>72.3</td><td>+1.0<span class="sig"></span></td><td>+2.2<span class="sig"></span></td><td>68</td><td>68</td><td><i>n/a</i></td></tr>
-                  <tr><td></td><td class="!text-left">GLOBAL only</td><td>79.0</td><td>+7.8<span class="sig">**</span></td><td>+5.8<span class="sig">*</span></td><td>11</td><td>11</td><td>0/5685</td></tr>
-                  <tr class="ours"><td></td><td class="!text-left">MixUA (LLM) + review</td><td>80.3</td><td>+8.9<span class="sig">**</span></td><td>+8.0<span class="sig">**</span></td><td>89</td><td>89</td><td>2/9753</td></tr>
-                  <tr class="sep"><td>20</td><td class="!text-left">No memory</td><td>70.8</td><td>–<span class="sig"></span></td><td>–<span class="sig"></span></td><td>11</td><td>11</td><td><i>n/a</i></td></tr>
-                  <tr><td></td><td class="!text-left">PAIR only</td><td>71.4</td><td>+0.5<span class="sig"></span></td><td>+0.4<span class="sig"></span></td><td>46</td><td>42</td><td><i>n/a</i></td></tr>
-                  <tr><td></td><td class="!text-left">GLOBAL only</td><td>79.6</td><td>+8.7<span class="sig">**</span></td><td>+6.7<span class="sig">**</span></td><td>12</td><td>12</td><td>0/28097</td></tr>
-                  <tr class="ours"><td></td><td class="!text-left">MixUA (LLM) + review</td><td>81.8</td><td>+10.9<span class="sig">**</span></td><td>+8.4<span class="sig">**</span></td><td>82</td><td>74</td><td>3/57913</td></tr>
-                  <tr class="sep"><td>100</td><td class="!text-left">No memory</td><td>72.0</td><td>–<span class="sig"></span></td><td>–<span class="sig"></span></td><td>11</td><td>11</td><td><i>n/a</i></td></tr>
-                  <tr><td></td><td class="!text-left">PAIR only</td><td>72.1</td><td>+0.5<span class="sig"></span></td><td>−0.7<span class="sig"></span></td><td>20</td><td>15</td><td><i>n/a</i></td></tr>
-                  <tr><td></td><td class="!text-left">GLOBAL only</td><td>79.4</td><td>+7.3<span class="sig">**</span></td><td>+6.2<span class="sig">**</span></td><td>11</td><td>11</td><td>0/92160</td></tr>
-                  <tr class="ours"><td></td><td class="!text-left">MixUA (LLM) + review</td><td>78.1</td><td>+5.8<span class="sig">**</span></td><td>+4.4<span class="sig"></span></td><td>78</td><td>45</td><td>0/268215</td></tr>
-                </tbody>
-              </table>
-            </div>
-            <p class="swipe-hint">Swipe sideways to see all columns.</p>
-<p class="figcap">
-              <b>Table 3.</b> Number of users under random task assignment, rounds 2-8, one seed per size. <em>Pass</em> is the pass rate (%); gains are over no memory on matched attempts, for all attempts and for tasks no pair had attempted before (<em>First</em>). <em>Preference</em> is retention over rounds 2-8 among the users whose preferences were stated in round 1 (<em>Told</em>) and among all users (<em>All</em>). <em>Private facts</em> is the planted private facts found over those probed; <i>n/a</i> means no cross-user scope.
-            </p>
-          </div>
-
-          <!-- Privacy + ablation -->
-          <div class="mt-20 grid grid-cols-1 items-start gap-14 lg:grid-cols-2">
-            <div>
-              <h3 class="sub-title">Privacy</h3>
-              <p class="body mt-2">
-                Agents with MixUA open a planted file in 11-26% of attempts, yet three of its four variants place none in a forbidden scope in about 18k probes each, and store review removes the agentic writer's 4 violations.
-                Preferences leak less than in <span class="scope">GLOBAL</span>- and <span class="scope">AGENT</span>-only with the protected stream (0.9-4.8% vs. 5.5-26.3%).
-              </p>
-              <div class="case mt-6">
-                <h4>Case: a private file stays with its owner</h4>
-                <p>In round 2, an agent working for user u4 on a USACO task opened a planted passport-renewal worksheet and copied the holder's name, birth date, age, and address into its trajectory. The splitter released the algorithmic insight as reusable and a value-free note about the worksheet as protected, so none of the twelve planted values reached either stream or any entry, while the attempt's two <span class="scope">GLOBAL</span> task lessons went on to reach other users' pairs in round 3.</p>
-              </div>
-              <div class="case mt-6">
-                <h4>Case: a lesson crosses both boundaries</h4>
-                <p>In round 2, an agent solved an AutoCodeBench Dart task for user u4, and the writer stored a <span class="scope">GLOBAL</span> lesson that file calls already throw <code class="file">FileSystemException</code>, which implements Dart's <code class="file">IOException</code> interface, so the exception should propagate rather than be wrapped or redeclared. In round 3 the task went to a pair sharing neither user nor agent. Without memory, that agent failed all three runs on the compile error “The class 'IOException' is abstract and can't be instantiated”; with MixUA it received the lesson and passed all three.</p>
-              </div>
-            </div>
-
-            <div>
-              <h3 class="sub-title">What each scope adds</h3>
-              <p class="body mt-2">
-                Removing one scope at a time from MixUA (LLM): removing <span class="scope">GLOBAL</span> causes the largest utility drop, and removing <span class="scope">USER</span> the largest preference drop.
-                Removing <span class="scope">AGENT</span> or <span class="scope">PAIR</span> changes relatively little on the benchmark, so scope probes build the situations they exist for.
-              </p>
-              <div class="tbl-wrap mt-5">
-                <table class="tbl">
-                  <caption class="sr-only">What each scope adds: MixUA (LLM) without one scope</caption>
-                  <thead>
-                    <tr class="group">
-                      <th></th>
-                      <th colspan="3"><span>Benchmark</span></th>
-                      <th colspan="3"><span>Scope probe (%)</span></th>
-                    </tr>
-                    <tr>
-                      <th scope="col">Removed</th>
-                      <th scope="col">Δ ↑</th>
-                      <th scope="col">Δ<sub>cross</sub> ↑</th>
-                      <th scope="col">Pref. ↑</th>
-                      <th scope="col" class="!text-left">Metric</th>
-                      <th scope="col">With</th>
-                      <th scope="col">W/o</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr><td>None</td><td>15.3</td><td>13.0</td><td>90</td><td></td><td></td><td></td></tr>
-                    <tr><td>GLOBAL</td><td><b>9.0</b></td><td><b>4.6</b></td><td>90</td><td></td><td></td><td></td></tr>
-                    <tr><td>USER</td><td>10.5</td><td>8.8</td><td><b>81</b></td><td></td><td></td><td></td></tr>
-                    <tr><td>AGENT</td><td>14.8</td><td>12.5</td><td>91</td><td class="!text-left">Crowd pass ↑</td><td>89</td><td><b>40</b></td></tr>
-                    <tr><td></td><td></td><td></td><td></td><td class="!text-left">Spillover ↓</td><td>44</td><td><b>67</b></td></tr>
-                    <tr><td>PAIR</td><td>15.2</td><td>12.3</td><td>93</td><td class="!text-left">Leak ↓</td><td>22</td><td><b>95</b></td></tr>
-                  </tbody>
-                </table>
-              </div>
-              <p class="swipe-hint">Swipe sideways to see all columns.</p>
-<p class="figcap">
-                <b>Table 4.</b> What each scope adds: MixUA (LLM) without one scope. <b>Bold</b> means worst. <em>Crowd pass</em>: share of build probes passed when each agent needs its own build mode and every scope's budget fits about one entry. <em>Spillover</em>: at the normal budget, share of probes whose memory shows another agent's mode. <em>Leak</em>: share of a user's tasks on their other agents whose memory shows a work context the user asked to keep with one agent.
-              </p>
-              <p class="body mt-5"><span class="scope">AGENT</span> keeps an agent's own lessons retrievable and away from other agents, and <span class="scope">PAIR</span> keeps a user's context with the agent it was meant for.</p>
             </div>
           </div>
         </div>
@@ -763,9 +368,7 @@
       <!-- Citation ----------------------------------------------------------------------------- -->
       <section id="citation" class="section">
         <div class="wrap">
-          <p class="kicker">Citation</p>
-          <h2 class="section-title mt-2">BibTeX</h2>
-          <p class="body mt-3">If you find this work useful, please cite:</p>
+          <h2 class="section-title">BibTeX</h2>
           <!--
             DRAFT BibTeX, built from the arXiv id only.
             TODO(author): replace with the entry arXiv generates for 2611.10439 (it adds primaryClass),
@@ -804,7 +407,7 @@
           </svg>
           <span><span class="font-semibold text-ink">Who Remembers What?</span> · AWS Agentic AI</span>
         </div>
-        <p>Figures and illustrations are from the paper.</p>
+        <p>Figures from the paper.</p>
       </div>
     </footer>
 
