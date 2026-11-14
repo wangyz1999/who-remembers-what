@@ -9,6 +9,8 @@
 # Video: H.264 High, 1600 px wide, no audio track, CRF 25 with -tune animation (flat colours
 # and text compress well), +faststart so playback starts before the download finishes.
 # A 65 s 1080p cut comes out at about 3.5 MB; raise CRF if a longer cut exceeds ~5 MB.
+# The current cut is silent, so audio is dropped (-an). If a later cut has sound, replace
+# -an with -c:a aac -b:a 96k; the page's "Player controls" button then exposes the volume.
 set -euo pipefail
 
 src_video="${1:?usage: encode-hero.sh <video.mp4> <poster.png>}"
