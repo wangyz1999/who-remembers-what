@@ -1,0 +1,9 @@
+node_modules/
+dist/
+*.local
+.DS_Store
+Thumbs.db
+
+# Intermediate media (screenshots, trial encodes). Only the web-optimised files in media/ are committed.
+shots/
+*.tmp.*
